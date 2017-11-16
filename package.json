@@ -1,0 +1,32 @@
+{
+  "name": "pyzza",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "colors": "^1.1.2",
+    "express": "^4.16.2",
+    "http": "^0.0.0",
+    "lodash": "^4.17.4",
+    "mongodb": "^2.2.33",
+    "mongoose": "^4.12.3",
+    "path": "^0.12.7",
+    "socket.io": "^2.0.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node ./node_modules/mocha/bin/mocha -R nyan mainTest.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/timAdrien/pYzza.git"
+  },
+  "author": "Timothée ADRIEN",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/timAdrien/pYzza/issues"
+  },
+  "homepage": "https://github.com/timAdrien/pYzza#readme"
+}
