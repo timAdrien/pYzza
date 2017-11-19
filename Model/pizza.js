@@ -22,7 +22,7 @@ const pizza = new Schema({
     description      : { type: String, required: true },
     photo            : { data: String, contentType: String },
     prix             : { type: Number, required: true },
-    ingredient_ids   : [{ type: Schema.Types.ObjectId, ref: 'Ingredient', required: true }],
+    ingredient_ids   : [{ type: Schema.Types.ObjectId, ref: 'Ingredient' }],
     created_at       : { type: Date },
     updated_at       : { type: Date },
 }, { emitIndexErrors: true });

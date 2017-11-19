@@ -1,0 +1,5 @@
+#!/bin/bash
+
+jsdoc server.js
+jsdoc Model
+jsdoc Controller

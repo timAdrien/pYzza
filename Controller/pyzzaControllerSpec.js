@@ -20,13 +20,8 @@ var request = require('request');
 // Set the headers
 var headers = {
     'User-Agent':       'Super Agent/0.0.1',
+    'Authorization':    'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRpdGkiLCJpYXQiOjE1MTEwOTgzMTZ9.Ch9t8cumg2KlFcbRtQ6jnBB-abE_OM1fjik5D197CkE',
     'Content-Type':     'application/json'
-}
-
-// Configure the request
-var options = {
-    method: 'POST',
-    headers: headers
 }
 
 describe('Test CRUD Pyzza...', () => {
@@ -40,6 +35,7 @@ describe('Test CRUD Pyzza...', () => {
         }
         chaiRequest
         .post('/pizza/create')
+        .set(headers)
         .send(pizza)
         .end((error, res) => {
             res.should.have.status(200);
@@ -49,22 +45,11 @@ describe('Test CRUD Pyzza...', () => {
             done();
         });
       });
-    it('GET une pizza nommée "The Lord of the Rings"', (done) => {
-        let nomPizza = "The Lord of the Rings";
-        chaiRequest
-            .get('/pizza/voir/' + nomPizza)
-            .end((error, res) => {
-                res.should.have.status(200);
-                assert.isObject(res.body, 'La pizza est un objet.');
-                assert.strictEqual(res.body.nom, nomPizza, 'Le nom de la pizza retournée est bon');
-                done();
-            });
-      });
       
     it('GET une pizza par _id', (done) => {
         chaiRequest
-            .get('/pizza/voir/')
-            .send(pizzaCree)
+            .get('/pizza/voir/'+pizzaCree._id)
+            .set(headers)
             .end((error, res) => {
                 res.should.have.status(200);
                 assert.isObject(res.body, 'La pizza est un objet.');
@@ -76,12 +61,13 @@ describe('Test CRUD Pyzza...', () => {
       
     it('PUT maj prix d\'une pizza', (done) => {
         chaiRequest
-            .get('/pizza/voir/')
-            .send(pizzaCree)
+            .get('/pizza/voir/'+pizzaCree._id)
+            .set(headers)
             .end((error, res) => {
                 res.body.prix = 25;
                 chaiRequest
                     .put('/pizza/modifier/')
+                    .set(headers)
                     .send(res.body)
                     .end((error2, res2) => {
                         res2.should.have.status(200);
@@ -96,8 +82,8 @@ describe('Test CRUD Pyzza...', () => {
     it('PUT maj ingrédient d\'une pizza', (done) => {
         // Test ajout ingrédient dans une pizza
             chaiRequest
-            .get('/pizza/voir/')
-            .send(pizzaCree)
+            .get('/pizza/voir/' + pizzaCree._id)
+            .set(headers)
             .end((error, res) => {
                 let IngredientAjoute = {
                     nom: "Piment",
@@ -107,21 +93,24 @@ describe('Test CRUD Pyzza...', () => {
                 
                 chaiRequest
                 .post('/Ingredient/create')
+                .set(headers)
                 .send(IngredientAjoute)
                 .end((error2, res2) => {
-                    res.should.have.status(200);
-                    assert.isObject(res.body, 'La Ingredient est un objet.');
+                    res2.should.have.status(200);
+                    assert.isObject(res2.body, "L’Ingredient est un objet.");
                     assert.containsAllKeys(res2.body, ["nom","poids","prix"]);
-                    IngredientAjoute = res.body;
-                    pizzaCree.ingredient_ids.push(res.body._id);
+                    IngredientAjoute = res2.body;
+                    pizzaCree.ingredient_ids.push(IngredientAjoute._id);
+                    
                     chaiRequest
                     .put('/pizza/modifier/')
+                    .set(headers)
                     .send(pizzaCree)
                     .end((error3, res3) => {
-                        res2.should.have.status(200);
+                        res3.should.have.status(200);
                         assert.isObject(res3.body, 'La pizza est un objet.');
-                        assert.include(res3.body.ingredient_ids, res.body._id, 'L\'ingrédient a bien été ajouté');
-                        pizzaCree = res2.body;
+                        assert.deepEqual([res3.body.ingredient_ids[0]], [IngredientAjoute], 'L\'ingrédient a bien été ajouté');
+                        pizzaCree = res3.body;
                         done();
                     });
                 });
@@ -130,11 +119,12 @@ describe('Test CRUD Pyzza...', () => {
     
       it('DELETE Pizza', (done) => {
         chaiRequest
-            .delete('/pizza/supprimer/')
-            .send(pizzaCree)
+            .delete('/pizza/supprimer/' + pizzaCree._id)
+            .set(headers)
             .end((error, res) => {
                 res.should.have.status(200);
                 done();
             });
       });
+      
 });
