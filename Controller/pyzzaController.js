@@ -5,6 +5,7 @@ let router = express.Router();
 
 // Schemas
 let Pizza = require('../Model/pizza');
+let Historique = require('../Model/historique');
     
 //Require Mongoose
 let mongoose = require('mongoose');
@@ -35,7 +36,7 @@ router.put('/modifier', function (req, res, next) {
 });
 
 //DELETE
-router.delete('/supprimer', function (req, res, next) {
+router.delete('/supprimer/:_id', function (req, res, next) {
     deletePizza(req, res, next)
 });
 
@@ -52,7 +53,6 @@ function getPizzas (req, res, next) {
         return res.status(500).json({message: err });
       }
       else {
-        res.header('Access-Control-Allow-Origin','*');
         res.status(200).json(pizzas);
       }
     });
@@ -66,7 +66,6 @@ function getPizzaById (req, res, next) {
         return res.status(500).json({message: err });
       }
       else {
-        res.header('Access-Control-Allow-Origin','*');
         res.status(200).json(pizzas);
       }
     });
@@ -80,7 +79,6 @@ function getPizzaByNom (req, res, next) {
         return res.status(500).json({message: err });
       }
       else {
-        res.header('Access-Control-Allow-Origin','*');
         res.status(200).json(pizza);
       }
     });
@@ -91,6 +89,7 @@ function postPizza(req, res, next) {
         nom             : req.body.nom,
         prix            : req.body.prix,
         description     : req.body.description,
+        photo           : req.body.photo,
         ingredient_ids  : req.body.ingredient_ids
     });
     
@@ -103,7 +102,6 @@ function postPizza(req, res, next) {
             res.json({ message: err });
         }
         else {
-            res.header('Access-Control-Allow-Origin','*');
             res.status(200).json(pizzaNew);
         }
     });
@@ -115,7 +113,10 @@ function putPizza(req, res, next) {
         if (err) {
             res.status(500);
             res.json({ message: err });
-        } else if (pizza){
+        } else if (pizza) {
+            // Pizza à historiser
+            let oldObjectUpdated = JSON.stringify(pizza);
+            
             // Update seulement les attributs reçus de body
             let pizzaToUpdate = Object.assign(pizza, req.body);
             
@@ -129,8 +130,18 @@ function putPizza(req, res, next) {
                 res.json({ message: err });
               }
               else {
-                res.header('Access-Control-Allow-Origin','*');
-                res.status(200).json(pizza);
+                let historique = {type: "Pizza", action: "PUT", oldObject: oldObjectUpdated, newObject: JSON.stringify(pizzaToUpdate)};
+                Historique(historique).save((err, todo) => {
+                    if (err && err.code == 11000) {
+                        return res.status(404).send(`Erreur dans l'historisation de votre pizza, veuillez contacter votre administrateur. ${err}`);
+                    }
+                    else if (err) { 
+                        res.status(500);
+                        res.json({ message: err });
+                    } else {  
+                        res.status(200).json(pizza);
+                    }
+                });
               }
             });
         } else {
@@ -141,14 +152,13 @@ function putPizza(req, res, next) {
 }
 
 function deletePizza(req, res, next) {
-    Pizza.remove({_id: req.body._id}, (err, pizza) => {  
+    Pizza.remove({_id: req.params._id}, (err, pizza) => {  
         // Gère les erreurs
         if (err) {
           res.status(500);
           res.json({ message: err });
         } else {
-            res.header('Access-Control-Allow-Origin','*');
-            res.status(200).send("Pizza supprimée");
+            res.status(200).json(`OK`);
         }
     });
 }

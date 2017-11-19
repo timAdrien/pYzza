@@ -38,12 +38,6 @@ pizza.pre('save', function(next) {
     next();
 });
 
-// Remove les id des ingredients referençants la pizza 
-/*pizza.pre('', function(next) {
-    this.update_at = Date.now();
-    next();
-})*/
-
 var handleE11000 = function(error, res, next) {
   if (error.name === 'MongoError' && error.code === 11000) {
     let error = new Error('Erreur de duplication de clé unique...');
